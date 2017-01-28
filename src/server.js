@@ -1,8 +1,12 @@
+import { EventEmitter } from 'events';
 import { readFileSync } from 'fs';
 import { Server as HttpServer } from 'http';
 import { Server as WsServer } from 'ws';
 
-import { Auth } from '@scola/auth-server';
+import {
+  Auth,
+  load as loadAuth
+} from '@scola/auth-server';
 
 import {
   HttpConnector,
@@ -13,8 +17,10 @@ import {
 
 import { I18n } from '@scola/i18n';
 
-export default class Server {
+export default class Server extends EventEmitter {
   constructor() {
+    super();
+
     this._auth = null;
     this._codec = null;
     this._database = null;
@@ -24,9 +30,15 @@ export default class Server {
     this._router = null;
     this._ws = null;
     this._wsServer = null;
+
+    this._handleError = (e) => this._error(e);
   }
 
   destroy(code, reason, callback = () => {}) {
+    this._unbindHttp();
+    this._unbindRouter();
+    this._unbindWs();
+
     this._closeWs(code, reason, () => {
       this._closeHttp(callback);
     });
@@ -83,6 +95,7 @@ export default class Server {
     if (!this._router) {
       this._router = new Router();
       this._router.on('error', handleError());
+      this._bindRouter();
     }
 
     return this._router;
@@ -97,6 +110,7 @@ export default class Server {
       .server(this._httpInstance(options))
       .router(this.router());
 
+    this._bindHttp();
     return this;
   }
 
@@ -118,7 +132,53 @@ export default class Server {
       .codec(this.codec())
       .ping(options.ping);
 
+    this._bindWs();
     return this;
+  }
+
+  start() {
+    loadAuth(this);
+    return this;
+  }
+
+  _bindHttp() {
+    if (this._http) {
+      this._http.on('error', this._handleError);
+    }
+  }
+
+  _unbindHttp() {
+    if (this._http) {
+      this._http.removeListener('error', this._handleError);
+    }
+  }
+
+  _bindRouter() {
+    if (this._router) {
+      this._router.on('error', this._handleError);
+    }
+  }
+
+  _unbindRouter() {
+    if (this._router) {
+      this._router.removeListener('error', this._handleError);
+    }
+  }
+
+  _bindWs() {
+    if (this._ws) {
+      this._ws.on('error', this._handleError);
+    }
+  }
+
+  _unbindWs() {
+    if (this._ws) {
+      this._ws.removeListener('error', this._handleError);
+    }
+  }
+
+  _error(error) {
+    this.emit('error', error);
   }
 
   _httpInstance(options) {
