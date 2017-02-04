@@ -12,7 +12,8 @@ import {
   HttpConnector,
   Router,
   WsConnector,
-  handleError
+  handleError,
+  load as loadApi
 } from '@scola/api';
 
 import { I18n } from '@scola/i18n';
@@ -137,7 +138,12 @@ export default class Server extends EventEmitter {
   }
 
   start() {
-    loadAuth(this);
+    loadApi(this);
+
+    if (this._auth) {
+      loadAuth(this);
+    }
+
     return this;
   }
 
