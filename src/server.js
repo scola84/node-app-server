@@ -9,6 +9,7 @@ import {
 } from '@scola/auth-server';
 
 import {
+  Cache,
   HttpConnector,
   Router,
   WsConnector,
@@ -22,6 +23,7 @@ export default class Server extends EventEmitter {
     super();
 
     this._auth = null;
+    this._cache = null;
     this._codec = null;
     this._database = null;
     this._http = null;
@@ -52,6 +54,17 @@ export default class Server extends EventEmitter {
     this._auth = new Auth()
       .dao(dao)
       .key(readFileSync(options.key));
+
+    return this;
+  }
+
+  cache(client = null) {
+    if (client === null) {
+      return this._cache;
+    }
+
+    this._cache = new Cache()
+      .client(client);
 
     return this;
   }
