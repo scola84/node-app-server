@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import { readFileSync } from 'fs';
 import { Server as HttpServer } from 'http';
-import { Server as WsServer } from 'ws';
+import WebSocket, { Server as WsServer } from 'ws';
 
 import {
   Auth,
@@ -11,7 +11,9 @@ import {
 import {
   Cache,
   HttpConnector,
+  PubSub,
   Router,
+  WsConnection,
   WsConnector,
   handleError
 } from '@scola/api';
@@ -29,6 +31,7 @@ export default class Server extends EventEmitter {
     this._http = null;
     this._httpServer = null;
     this._i18n = null;
+    this._pubsub = null;
     this._router = null;
     this._ws = null;
     this._wsServer = null;
@@ -92,6 +95,19 @@ export default class Server extends EventEmitter {
     return this;
   }
 
+  http(options = null) {
+    if (options === null) {
+      return this._http;
+    }
+
+    this._http = new HttpConnector()
+      .server(this._httpInstance(options))
+      .router(this.router());
+
+    this._bindHttp();
+    return this;
+  }
+
   i18n(options = null) {
     if (options === null) {
       return this._i18n;
@@ -114,16 +130,22 @@ export default class Server extends EventEmitter {
     return this._router;
   }
 
-  http(options = null) {
-    if (options === null) {
-      return this._http;
+  pubsub(options = null) {
+    if (!this._pubsub) {
+      this._pubsub = new PubSub();
     }
 
-    this._http = new HttpConnector()
-      .server(this._httpInstance(options))
-      .router(this.router());
+    if (options === null) {
+      return this._pubsub;
+    }
 
-    this._bindHttp();
+    options.class = WebSocket;
+
+    const connection = new WsConnection()
+      .codec(this.codec())
+      .reconnector(options);
+
+    this._pubsub.connection(connection);
     return this;
   }
 
@@ -152,6 +174,10 @@ export default class Server extends EventEmitter {
   start() {
     if (this._auth) {
       loadAuth(this);
+    }
+
+    if (this._pubsub) {
+      this._pubsub.open();
     }
 
     return this;
