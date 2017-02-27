@@ -139,7 +139,9 @@ export default class Server extends EventEmitter {
       return this._pubsub;
     }
 
-    options.class = WebSocket;
+    options.factory = (u, p, o) => {
+      return new WebSocket(u, p, o);
+    };
 
     const connection = new WsConnection()
       .codec(this.codec())
