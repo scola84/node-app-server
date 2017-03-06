@@ -1,6 +1,7 @@
 import {
   cacheClient,
-  jsonCodec
+  jsonCodec,
+  jsonFilter
 } from '@scola/api';
 
 import Server from './src/server';
@@ -8,5 +9,6 @@ import Server from './src/server';
 export {
   Server,
   cacheClient,
-  jsonCodec
+  jsonCodec,
+  jsonFilter
 };
