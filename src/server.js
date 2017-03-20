@@ -9,7 +9,7 @@ import {
 } from '@scola/auth-server';
 
 import {
-  Cache,
+  CacheFactory,
   HttpConnector,
   PubSub,
   Router,
@@ -66,7 +66,7 @@ export default class Server extends EventEmitter {
       return this._cache;
     }
 
-    this._cache = new Cache()
+    this._cache = new CacheFactory()
       .client(client);
 
     return this;
