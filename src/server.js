@@ -11,7 +11,7 @@ import {
 import {
   CacheFactory,
   HttpConnector,
-  PubSub,
+  PubSubFactory,
   Router,
   WsConnection,
   WsConnector,
@@ -132,7 +132,7 @@ export default class Server extends EventEmitter {
 
   pubsub(options = null) {
     if (!this._pubsub) {
-      this._pubsub = new PubSub();
+      this._pubsub = new PubSubFactory();
     }
 
     if (options === null) {
