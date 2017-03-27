@@ -121,7 +121,7 @@ export default class Server extends EventEmitter {
   }
 
   router() {
-    if (!this._router) {
+    if (this._router === null) {
       this._router = new Router();
       this._router.on('error', handleError());
       this._bindRouter();
@@ -131,7 +131,7 @@ export default class Server extends EventEmitter {
   }
 
   pubsub(options = null) {
-    if (!this._pubsub) {
+    if (this._pubsub === null) {
       this._pubsub = new PubSubFactory();
     }
 
