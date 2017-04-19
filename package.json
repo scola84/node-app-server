@@ -8,6 +8,7 @@
   "main": "./index.js",
   "jsnext:main": "./index.js",
   "dependencies": {
-
+    "@scola/api": "^5.0.0",
+    "ws": "^2.2.3"
   }
 }
