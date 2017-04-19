@@ -1,6 +1,6 @@
 {
   "name": "@scola/app-server",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "App",
   "repository": "github:scola84/node-app-server",
   "author": "M.C. van den Boogaart <scola@kvdb.name>",
