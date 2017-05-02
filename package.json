@@ -8,9 +8,9 @@
   "main": "./index.js",
   "jsnext:main": "./index.js",
   "dependencies": {
-    "@scola/api": "^5.0.1",
-    "@scola/auth-server": "^3.0.0",
+    "@scola/api": "^5.1.0",
+    "@scola/auth-server": "^3.0.1",
     "@scola/i18n": "^6.0.0",
-    "ws": "^2.2.3"
+    "ws": "^2.3.1"
   }
 }
