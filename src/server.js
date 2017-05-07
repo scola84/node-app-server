@@ -31,6 +31,7 @@ export default class Server extends EventEmitter {
     this._http = null;
     this._httpServer = null;
     this._i18n = null;
+    this._logger = null;
     this._pubsub = null;
     this._router = null;
     this._ws = null;
@@ -117,6 +118,15 @@ export default class Server extends EventEmitter {
       .locale(options.locale)
       .timezone(options.timezone);
 
+    return this;
+  }
+
+  logger(value = null) {
+    if (value === null) {
+      return this._logger;
+    }
+
+    this._logger = value;
     return this;
   }
 
