@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
 import { readFileSync } from 'fs';
 import { Server as HttpServer } from 'http';
+import { createTransport } from 'nodemailer';
+import { markdown } from 'nodemailer-markdown';
 import WebSocket, { Server as WsServer } from 'ws';
 
 import {
@@ -34,6 +36,7 @@ export default class Server extends EventEmitter {
     this._logger = null;
     this._pubsub = null;
     this._router = null;
+    this._smtp = null;
     this._ws = null;
     this._wsServer = null;
 
@@ -158,6 +161,17 @@ export default class Server extends EventEmitter {
       .reconnector(options);
 
     this._pubsub.connection(connection);
+    return this;
+  }
+
+  smtp(options = null) {
+    if (options === null) {
+      return this._smtp;
+    }
+
+    this._smtp = createTransport(options);
+    this._smtp.use('compile', markdown());
+
     return this;
   }
 
