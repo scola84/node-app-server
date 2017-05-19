@@ -9,7 +9,7 @@
   "jsnext:main": "./index.js",
   "dependencies": {
     "@scola/api": "^5.1.7",
-    "@scola/auth-server": "^3.1.0",
+    "@scola/auth-server": "^3.1.2",
     "@scola/i18n": "^6.0.0",
     "nodemailer": "^4.0.1",
     "nodemailer-markdown": "^1.0.1",
