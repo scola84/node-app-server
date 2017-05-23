@@ -53,14 +53,18 @@ export default class Server extends EventEmitter {
     });
   }
 
-  auth(dao = null, options = null) {
+  auth(dao = null, options = {}) {
     if (dao === null) {
       return this._auth;
     }
 
     this._auth = new Auth()
-      .dao(dao)
-      .key(readFileSync(options.key));
+      .dao(dao);
+
+    if (typeof options.key !== 'undefined') {
+      this._auth
+        .key(readFileSync(options.key));
+    }
 
     return this;
   }
