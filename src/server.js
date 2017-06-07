@@ -11,9 +11,9 @@ import {
 } from '@scola/auth-server';
 
 import {
-  CacheFactory,
+  Cache,
   HttpConnector,
-  PubSubFactory,
+  PubSub,
   Router,
   WsConnection,
   WsConnector,
@@ -74,7 +74,7 @@ export default class Server extends EventEmitter {
       return this._cache;
     }
 
-    this._cache = new CacheFactory()
+    this._cache = new Cache()
       .client(client);
 
     return this;
@@ -149,7 +149,7 @@ export default class Server extends EventEmitter {
 
   pubsub(options = null) {
     if (this._pubsub === null) {
-      this._pubsub = new PubSubFactory();
+      this._pubsub = new PubSub();
     }
 
     if (options === null) {
