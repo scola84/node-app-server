@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { readFileSync } from 'fs';
 import { Server as HttpServer } from 'http';
+import get from 'lodash-es/get';
 import { createTransport } from 'nodemailer';
 import { markdown } from 'nodemailer-markdown';
 import WebSocket, { Server as WsServer } from 'ws';
@@ -28,8 +28,7 @@ export default class Server extends EventEmitter {
 
     this._auth = null;
     this._cache = null;
-    this._codec = null;
-    this._database = null;
+    this._config = {};
     this._http = null;
     this._httpServer = null;
     this._i18n = null;
@@ -48,23 +47,34 @@ export default class Server extends EventEmitter {
     this._unbindRouter();
     this._unbindWs();
 
+    if (this._auth) {
+      this._auth.destroy();
+    }
+
+    if (this._cache) {
+      this._cache.destroy();
+    }
+
+    if (this._logger) {
+      this._logger.destroy();
+    }
+
+    if (this._pubsub) {
+      this._pubsub.destroy();
+    }
+
     this._closeWs(code, reason, () => {
       this._closeHttp(callback);
     });
   }
 
-  auth(dao = null, options = {}) {
+  auth(dao = null) {
     if (dao === null) {
       return this._auth;
     }
 
     this._auth = new Auth()
       .dao(dao);
-
-    if (typeof options.key !== 'undefined') {
-      this._auth
-        .key(readFileSync(options.key));
-    }
 
     return this;
   }
@@ -80,26 +90,16 @@ export default class Server extends EventEmitter {
     return this;
   }
 
-  codec(value = null) {
+  config(value = null) {
     if (value === null) {
-      return this._codec;
+      return this._config;
     }
 
-    this._codec = value;
-
-    if (this._ws) {
-      this._ws.codec(value);
+    if (typeof value === 'string') {
+      return get(this._config, value);
     }
 
-    return this;
-  }
-
-  database(value = null) {
-    if (value === null) {
-      return this._database;
-    }
-
-    this._database = value;
+    this._config = value;
     return this;
   }
 
@@ -161,7 +161,7 @@ export default class Server extends EventEmitter {
     };
 
     const connection = new WsConnection()
-      .codec(this.codec())
+      .codec(options.codec)
       .reconnector(options);
 
     this._pubsub.connection(connection);
@@ -194,7 +194,7 @@ export default class Server extends EventEmitter {
     this._ws = new WsConnector()
       .server(this._wsServer)
       .router(this.router())
-      .codec(this.codec())
+      .codec(options.codec)
       .ping(options.ping);
 
     this._bindWs();
