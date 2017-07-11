@@ -21,6 +21,7 @@ import {
 } from '@scola/api';
 
 import { I18n } from '@scola/i18n';
+import Route from './route';
 
 export default class Server extends EventEmitter {
   constructor() {
@@ -135,6 +136,11 @@ export default class Server extends EventEmitter {
 
     this._logger = value;
     return this;
+  }
+
+  route() {
+    return new Route()
+      .server(this);
   }
 
   router() {
