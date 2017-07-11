@@ -12,13 +12,13 @@ export default class Route {
 
     this._authorize = null;
     this._cache = null;
+    this._channel = null;
     this._method = null;
     this._mode = 'object';
-    this._path = null;
-    this._ppublish = null;
     this._publish = null;
     this._respond = null;
     this._query = null;
+    this._route = null;
     this._validate = null;
   }
 
@@ -27,33 +27,33 @@ export default class Route {
     return this;
   }
 
-  get(path, query) {
+  get(route, query) {
     this._method = 'GET';
-    this._path = path;
+    this._route = route;
     this._query = query;
 
     return this;
   }
 
-  post(path, query) {
+  post(route, query) {
     this._method = 'POST';
-    this._path = path;
+    this._route = route;
     this._query = query;
 
     return this;
   }
 
-  put(path, query) {
+  put(route, query) {
     this._method = 'PUT';
-    this._path = path;
+    this._route = route;
     this._query = query;
 
     return this;
   }
 
-  delete(path, query) {
+  delete(route, query) {
     this._method = 'DELETE';
-    this._path = path;
+    this._route = route;
     this._query = query;
 
     return this;
@@ -74,8 +74,8 @@ export default class Route {
     return this;
   }
 
-  publish(path, handler) {
-    this._ppublish = path;
+  publish(channel, handler) {
+    this._channel = channel;
     this._publish = handler;
     return this;
   }
@@ -104,7 +104,7 @@ export default class Route {
       .router()
       .route(
         this._method,
-        this._path,
+        this._route,
         ...handlers
       );
 
@@ -136,22 +136,21 @@ export default class Route {
       this._server
         .pubsub()
         .client()
-        .on(this._ppublish, (message) => {
+        .on(this._channel, (message) => {
           this._publish(message);
         });
       return;
     }
 
     handlers.push((request, response, next) => {
-      this._server
-        .pubsub()
-        .client()
-        .publish(this._ppublish, (callback) => {
-          this._publish(request, (data) => {
-            callback(data);
-            next();
-          });
-        });
+      this._publish(request, (data) => {
+        this._server
+          .pubsub()
+          .client()
+          .publish(this._channel, data);
+
+        next();
+      });
     });
   }
 
