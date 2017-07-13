@@ -10,6 +10,7 @@ export default class Route {
   constructor() {
     this._server = null;
 
+    this._allow = null;
     this._authorize = null;
     this._cache = null;
     this._channel = null;
@@ -32,6 +33,7 @@ export default class Route {
     this._route = route;
     this._query = query;
 
+    this._open();
     return this;
   }
 
@@ -40,6 +42,7 @@ export default class Route {
     this._route = route;
     this._query = query;
 
+    this._open();
     return this;
   }
 
@@ -48,6 +51,7 @@ export default class Route {
     this._route = route;
     this._query = query;
 
+    this._open();
     return this;
   }
 
@@ -56,6 +60,12 @@ export default class Route {
     this._route = route;
     this._query = query;
 
+    this._open();
+    return this;
+  }
+
+  allow(value) {
+    this._allow = value;
     return this;
   }
 
@@ -90,10 +100,11 @@ export default class Route {
     return this;
   }
 
-  open() {
+  _open() {
     const handlers = [];
 
     this._addValidate(handlers);
+    this._addAllow(handlers);
     this._addAuthorize(handlers);
     this._addQuery(handlers);
     this._addRespond(handlers);
@@ -113,12 +124,20 @@ export default class Route {
     }
   }
 
+  _addAllow(handlers) {
+    if (this._allow === null) {
+      return;
+    }
+
+    handlers.push(authorize(this._allow));
+  }
+
   _addAuthorize(handlers) {
     if (this._authorize === null) {
       return;
     }
 
-    handlers.push(authorize(this._authorize));
+    handlers.push(this._authorize);
   }
 
   _addCache(handlers) {
