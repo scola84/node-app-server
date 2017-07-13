@@ -5,6 +5,7 @@ import {
 } from '@scola/api';
 
 import { authorize } from '@scola/auth-server';
+import { ScolaError } from '@scola/error';
 
 export default class Route {
   constructor() {
@@ -151,6 +152,10 @@ export default class Route {
   }
 
   _addPublish(handlers) {
+    if (this._publish === null) {
+      return;
+    }
+
     if (this._method === 'GET') {
       this._server
         .pubsub()
@@ -181,8 +186,14 @@ export default class Route {
 
     handlers.push((request, response, next) => {
       this._query(request, (error, result = null) => {
-        if (error instanceof Error === true) {
+        if (error instanceof ScolaError === true) {
           next(error);
+          return;
+        }
+
+        if (error instanceof Error === true) {
+          next(request.error('500 invalid_query ' +
+            error.message));
           return;
         }
 
