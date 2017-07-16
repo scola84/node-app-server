@@ -15,6 +15,7 @@ export default class Route {
     this._authorize = null;
     this._cache = null;
     this._channel = null;
+    this._invert = null;
     this._method = null;
     this._mode = 'object';
     this._publish = null;
@@ -80,8 +81,9 @@ export default class Route {
     return this;
   }
 
-  mode(value) {
+  mode(value, invert = false) {
     this._mode = value;
+    this._invert = invert;
     return this;
   }
 
@@ -142,13 +144,18 @@ export default class Route {
   }
 
   _addCache(handlers) {
-    if (this._mode === 'list') {
+    if (this._mode === 'list' && this._invert === false) {
       handlers.push(cached(this._server.cache(),
         this._cache, this._query, 'total'));
     }
 
     handlers.push(cached(this._server.cache(),
       this._cache, this._query, this._mode));
+
+    if (this._mode === 'list' && this._invert === true) {
+      handlers.push(cached(this._server.cache(),
+        this._cache, this._query, 'total'));
+    }
   }
 
   _addPublish(handlers) {
