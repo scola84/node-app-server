@@ -62,8 +62,7 @@ export default class Route {
     this._route = route;
     this._query = query;
 
-    this._open();
-    return this;
+    return this._open();
   }
 
   allow(value) {
@@ -125,6 +124,8 @@ export default class Route {
     if (this._method !== 'GET') {
       route.extract();
     }
+
+    return route;
   }
 
   _addAllow(handlers) {
