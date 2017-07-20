@@ -6,11 +6,6 @@ import { markdown } from 'nodemailer-markdown';
 import WebSocket, { Server as WsServer } from 'ws';
 
 import {
-  Auth,
-  load as loadAuth
-} from '@scola/auth-server';
-
-import {
   Cache,
   HttpConnector,
   PubSub,
@@ -20,6 +15,12 @@ import {
   handleError
 } from '@scola/api';
 
+import {
+  Auth,
+  load as loadAuth
+} from '@scola/auth-server';
+
+import { ScolaError } from '@scola/error';
 import { I18n } from '@scola/i18n';
 import Route from './route';
 
@@ -102,6 +103,10 @@ export default class Server extends EventEmitter {
 
     this._config = value;
     return this;
+  }
+
+  error(message) {
+    return new ScolaError(message);
   }
 
   http(options = null) {
