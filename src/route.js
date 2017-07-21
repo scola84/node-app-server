@@ -11,8 +11,8 @@ export default class Route {
   constructor() {
     this._server = null;
 
-    this._allow = null;
-    this._authorize = null;
+    this._allow = [];
+    this._authorize = [];
     this._cache = null;
     this._channel = null;
     this._invert = null;
@@ -22,7 +22,7 @@ export default class Route {
     this._respond = null;
     this._query = null;
     this._route = null;
-    this._validate = null;
+    this._validate = [];
   }
 
   server(value) {
@@ -66,12 +66,12 @@ export default class Route {
   }
 
   allow(value) {
-    this._allow = value;
+    this._allow.push(value);
     return this;
   }
 
   authorize(value) {
-    this._authorize = value;
+    this._authorize.push(value);
     return this;
   }
 
@@ -98,7 +98,7 @@ export default class Route {
   }
 
   validate(value) {
-    this._validate = value;
+    this._validate.push(value);
     return this;
   }
 
@@ -133,7 +133,9 @@ export default class Route {
       return;
     }
 
-    handlers.push(authorize(this._allow));
+    this._allow.forEach((handler) => {
+      handlers.push(authorize(handler));
+    });
   }
 
   _addAuthorize(handlers) {
@@ -141,7 +143,9 @@ export default class Route {
       return;
     }
 
-    handlers.push(this._authorize);
+    this._authorize.forEach((handler) => {
+      handlers.push(handler);
+    });
   }
 
   _addCache(handlers) {
@@ -248,8 +252,10 @@ export default class Route {
       return;
     }
 
-    handlers.push((request, response, next) => {
-      this._validate(request, next);
+    this._validate.forEach((handler) => {
+      handlers.push((request, response, next) => {
+        handler(request, next);
+      });
     });
   }
 }
