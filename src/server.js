@@ -226,36 +226,42 @@ export default class Server extends EventEmitter {
 
   _bindHttp() {
     if (this._http) {
+      this._http.setMaxListeners(this._http.getMaxListeners() + 1);
       this._http.on('error', this._handleError);
     }
   }
 
   _unbindHttp() {
     if (this._http) {
+      this._http.setMaxListeners(this._http.getMaxListeners() - 1);
       this._http.removeListener('error', this._handleError);
     }
   }
 
   _bindRouter() {
     if (this._router) {
+      this._router.setMaxListeners(this._router.getMaxListeners() + 1);
       this._router.on('error', this._handleError);
     }
   }
 
   _unbindRouter() {
     if (this._router) {
+      this._router.setMaxListeners(this._router.getMaxListeners() - 1);
       this._router.removeListener('error', this._handleError);
     }
   }
 
   _bindWs() {
     if (this._ws) {
+      this._ws.setMaxListeners(this._ws.getMaxListeners() + 1);
       this._ws.on('error', this._handleError);
     }
   }
 
   _unbindWs() {
     if (this._ws) {
+      this._ws.setMaxListeners(this._ws.getMaxListeners() - 1);
       this._ws.removeListener('error', this._handleError);
     }
   }
