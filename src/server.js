@@ -1,8 +1,10 @@
 import { EventEmitter } from 'events';
 import { Server as HttpServer } from 'http';
 import get from 'lodash-es/get';
+import omit from 'lodash-es/omit';
 import { createTransport } from 'nodemailer';
 import { markdown } from 'nodemailer-markdown';
+import sprintf from 'sprintf';
 import WebSocket, { Server as WsServer } from 'ws';
 
 import {
@@ -31,6 +33,8 @@ export default class Server extends EventEmitter {
     this._auth = null;
     this._cache = null;
     this._config = {};
+    this._database = null;
+    this._databases = {};
     this._http = null;
     this._httpServer = null;
     this._i18n = null;
@@ -57,12 +61,12 @@ export default class Server extends EventEmitter {
       this._cache.destroy();
     }
 
-    if (this._logger) {
-      this._logger.destroy();
-    }
-
     if (this._pubsub) {
       this._pubsub.destroy();
+    }
+
+    if (this._database) {
+      this._closeDatabase();
     }
 
     this._closeWs(code, reason, () => {
@@ -102,6 +106,42 @@ export default class Server extends EventEmitter {
     }
 
     this._config = value;
+    return this;
+  }
+
+  database(name = null, shard = null, callback = null) {
+    if (name === null) {
+      return this._database;
+    }
+
+    if (typeof name === 'function') {
+      this._database = name;
+      return this;
+    }
+
+    if (typeof shard === 'function') {
+      callback = shard;
+      shard = null;
+    }
+
+    let config = this._config.database[name] ||
+      this._config.database.default;
+
+    if (shard !== null) {
+      config = config
+        .server[Math.floor(shard / config.shards)];
+      config = Object.assign({}, config, {
+        database: sprintf(config.database, shard)
+      });
+    }
+
+    const id = JSON.stringify(omit(config, 'database'));
+
+    if (typeof this._databases[id] === 'undefined') {
+      this._databases[id] = this._database(config, true);
+    }
+
+    callback(this._databases[id], config.database);
     return this;
   }
 
@@ -279,6 +319,14 @@ export default class Server extends EventEmitter {
     this._httpServer.listen(options.port, options.host);
 
     return this._httpServer;
+  }
+
+  _closeDatabase() {
+    Object.keys(this._databases).forEach((name) => {
+      this._database(this._databases[name], false);
+    });
+
+    this._databases = {};
   }
 
   _closeHttp(callback = () => {}) {
