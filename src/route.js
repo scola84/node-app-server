@@ -14,12 +14,12 @@ export default class Route {
     this._allow = [];
     this._authorize = [];
     this._cache = null;
-    this._channel = null;
     this._invert = null;
     this._method = null;
     this._mode = 'object';
-    this._publish = null;
+    this._publish = [];
     this._respond = null;
+    this._subscribe = [];
     this._query = null;
     this._route = null;
     this._validate = [];
@@ -86,14 +86,18 @@ export default class Route {
     return this;
   }
 
-  publish(channel, handler) {
-    this._channel = channel;
-    this._publish = handler;
+  publish(path, event, handler) {
+    this._publish.push([path, event, handler]);
     return this;
   }
 
   respond(value) {
     this._respond = value;
+    return this;
+  }
+
+  subscribe(path, event, handler) {
+    this._subscribe.push([path, event, handler]);
     return this;
   }
 
@@ -129,20 +133,12 @@ export default class Route {
   }
 
   _addAllow(handlers) {
-    if (this._allow === null) {
-      return;
-    }
-
     this._allow.forEach((handler) => {
       handlers.push(authorize(handler));
     });
   }
 
   _addAuthorize(handlers) {
-    if (this._authorize === null) {
-      return;
-    }
-
     this._authorize.forEach((handler) => {
       handlers.push(handler);
     });
@@ -164,28 +160,16 @@ export default class Route {
   }
 
   _addPublish(handlers) {
-    if (this._publish === null) {
-      return;
-    }
+    this._publish.forEach(([path, event, handler]) => {
+      handlers.push((request, response, next) => {
+        handler(request, (data) => {
+          this._server
+            .pubsub()
+            .client()
+            .publish(path, { event, data });
 
-    if (this._method === 'GET') {
-      this._server
-        .pubsub()
-        .client()
-        .on(this._channel, (message) => {
-          this._publish(message);
+          next();
         });
-      return;
-    }
-
-    handlers.push((request, response, next) => {
-      this._publish(request, (data) => {
-        this._server
-          .pubsub()
-          .client()
-          .publish(this._channel, data);
-
-        next();
       });
     });
   }
@@ -236,15 +220,15 @@ export default class Route {
   }
 
   _addSubscribe(handlers) {
-    if (this._method !== 'GET') {
-      return;
-    }
-
-    if (this._publish === null) {
-      return;
-    }
-
     handlers.push(subscribe(this._server.pubsub()));
+
+    this._subscribe.forEach(([path, event, handler]) => {
+      this._server
+        .pubsub()
+        .client()
+        .subscribe(path)
+        .on(event, handler);
+    });
   }
 
   _addValidate(handlers) {
