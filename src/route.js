@@ -62,7 +62,8 @@ export default class Route {
     this._route = route;
     this._query = query;
 
-    return this._open();
+    this._open();
+    return this;
   }
 
   allow(value) {
