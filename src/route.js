@@ -36,7 +36,6 @@ export default class Route {
     this._query = query;
 
     this._open();
-    return this;
   }
 
   post(route, query) {
@@ -45,7 +44,6 @@ export default class Route {
     this._query = query;
 
     this._open();
-    return this;
   }
 
   put(route, query) {
@@ -54,7 +52,6 @@ export default class Route {
     this._query = query;
 
     this._open();
-    return this;
   }
 
   delete(route, query) {
@@ -63,7 +60,6 @@ export default class Route {
     this._query = query;
 
     this._open();
-    return this;
   }
 
   allow(value) {
