@@ -8,6 +8,7 @@ import WebSocket, { Server as WsServer } from 'ws';
 import {
   Cache,
   HttpConnector,
+  Logger,
   PubSub,
   Router,
   WsConnection,
@@ -144,12 +145,15 @@ export default class Server extends EventEmitter {
     return this;
   }
 
-  logger(value = null) {
-    if (value === null) {
+  logger(config = null) {
+    if (config === null) {
       return this._logger;
     }
 
-    this._logger = value;
+    this._logger = new Logger()
+      .config(config)
+      .server(this);
+
     return this;
   }
 
