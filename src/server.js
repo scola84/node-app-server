@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { Server as HttpServer } from 'http';
 import get from 'lodash-es/get';
+import ip from 'ip';
 import { createTransport } from 'nodemailer';
 import { markdown } from 'nodemailer-markdown';
 import WebSocket, { Server as WsServer } from 'ws';
@@ -23,6 +24,8 @@ import {
 
 import { ScolaError } from '@scola/error';
 import { I18n } from '@scola/i18n';
+
+import Processor from './processor';
 import Route from './route';
 
 export default class Server extends EventEmitter {
@@ -36,7 +39,9 @@ export default class Server extends EventEmitter {
     this._http = null;
     this._httpServer = null;
     this._i18n = null;
+    this._id = null;
     this._logger = null;
+    this._processors = [];
     this._pubsub = null;
     this._router = null;
     this._smtp = null;
@@ -145,6 +150,10 @@ export default class Server extends EventEmitter {
     return this;
   }
 
+  id() {
+    return this._id;
+  }
+
   logger(config = null) {
     if (config === null) {
       return this._logger;
@@ -154,6 +163,19 @@ export default class Server extends EventEmitter {
       .config(config)
       .server(this);
 
+    return this;
+  }
+
+  processor(config = null) {
+    if (config === null) {
+      return this._proccesors;
+    }
+
+    const processor = new Processor()
+      .config(config)
+      .server(this);
+
+    this._processors.push(processor);
     return this;
   }
 
@@ -227,6 +249,8 @@ export default class Server extends EventEmitter {
   }
 
   start() {
+    this._id = ip.toLong(ip.address());
+
     if (this._auth) {
       loadAuth(this);
     }
@@ -234,6 +258,10 @@ export default class Server extends EventEmitter {
     if (this._pubsub) {
       this._pubsub.open();
     }
+
+    this._processors.forEach((processor) => {
+      processor.start();
+    });
 
     return this;
   }
