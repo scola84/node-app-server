@@ -29,20 +29,33 @@ export default class Processor {
   }
 
   start() {
-    this._log('Processor start %j', this._config);
+    this._log('Processor start');
 
-    this._server
-      .pubsub()
-      .client()
-      .subscribe(this._config.pubsub.path)
-      .on(this._config.pubsub.event, (data) => {
-        this._publish(data);
-      });
+    this._config.pubsub.subscribe.forEach((path) => {
+      this._subscribe(path);
+    });
 
     this._setup();
   }
 
+  _subscribe(path) {
+    this._log('Processor _subscribe', path);
+
+    const subscription = this._server
+      .pubsub()
+      .client()
+      .subscribe(path);
+
+    subscription.on('done', (data) => this._run(data));
+    subscription.on('pause', () => this._pause());
+    subscription.on('reset', () => this._reset());
+    subscription.on('resume', () => this._resume());
+    subscription.on('run', (data) => this._run(data));
+  }
+
   _setup() {
+    this._log('Processor _setup');
+
     this._queue = queue((t, c) => this._process(t, c),
       this._config.queue.concurrency);
 
@@ -73,45 +86,6 @@ export default class Processor {
       .run(callback);
   }
 
-  _publish(data) {
-    this._log('Processor _pubsub data=%j', data);
-
-    if (this._cancel(data) === true) {
-      return false;
-    }
-
-    if (data.action === 'pause') {
-      this._pause();
-    }
-
-    if (data.action === 'reset') {
-      this._clear();
-      this._setup();
-    }
-
-    if (data.action === 'resume') {
-      this._resume();
-    }
-
-    if (data.action === 'run') {
-      this._run(data);
-    }
-
-    return true;
-  }
-
-  _cancel(data) {
-    if (typeof data.si !== 'undefined') {
-      return data.si !== this._server.id();
-    }
-
-    if (typeof data.pn !== 'undefined') {
-      return data.pn !== this._config.name;
-    }
-
-    return false;
-  }
-
   _clear() {
     if (this._queue) {
       this._queue.kill();
@@ -124,9 +98,7 @@ export default class Processor {
       .logger()
       .stat(
         [this._compose(name, value)],
-        this._config.database.queue,
-        null,
-        false
+        this._config.database.processor
       );
   }
 
@@ -135,9 +107,7 @@ export default class Processor {
       .logger()
       .text(
         [this._compose(name, value)],
-        this._config.database.queue,
-        null,
-        false
+        this._config.database.processor
       );
   }
 
@@ -154,6 +124,11 @@ export default class Processor {
   _pause() {
     this._queue.pause();
     this._stat('paused', 1);
+  }
+
+  _reset() {
+    this._clear();
+    this._setup();
   }
 
   _resume() {
