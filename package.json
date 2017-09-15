@@ -8,14 +8,14 @@
   "main": "./index.js",
   "jsnext:main": "./index.js",
   "dependencies": {
-    "@scola/api": "^7.0.0",
+    "@scola/api": "^8.0.0",
     "@scola/auth-server": "^4.0.0",
     "@scola/error": "^5.1.0",
     "@scola/i18n": "^7.0.0",
     "lodash-es": "^4.17.4",
-    "nodemailer": "^4.0.1",
+    "nodemailer": "^4.1.0",
     "nodemailer-markdown": "^1.0.1",
     "sprintf": "^0.1.5",
-    "ws": "^3.1.0"
+    "ws": "^3.2.0"
   }
 }
