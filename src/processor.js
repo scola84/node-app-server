@@ -98,7 +98,7 @@ export default class Processor {
       .logger()
       .stat(
         [this._compose(name, value)],
-        this._config.database.processor
+        this._config.database.logger
       );
   }
 
@@ -107,7 +107,7 @@ export default class Processor {
       .logger()
       .text(
         [this._compose(name, value)],
-        this._config.database.processor
+        this._config.database.logger
       );
   }
 
