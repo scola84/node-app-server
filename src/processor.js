@@ -31,8 +31,8 @@ export default class Processor {
   start() {
     this._log('Processor start');
 
-    this._config.pubsub.subscribe.forEach((path) => {
-      this._subscribe(path);
+    ['proc', 'task'].forEach((suffix) => {
+      this._subscribe('/' + this._config.name + '.' + suffix);
     });
 
     this._setup();
@@ -113,7 +113,7 @@ export default class Processor {
 
   _compose(name, value) {
     return [
-      this._config.name + '.queue.' + name,
+      this._config.name + '.' + name,
       this._server.id(),
       Date.now(),
       0,
