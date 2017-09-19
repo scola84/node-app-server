@@ -12,6 +12,7 @@
     "@scola/auth-server": "^4.0.0",
     "@scola/error": "^5.1.0",
     "@scola/i18n": "^7.0.0",
+    "ip": "^1.1.5",
     "lodash-es": "^4.17.4",
     "nodemailer": "^4.1.0",
     "nodemailer-markdown": "^1.0.1",
