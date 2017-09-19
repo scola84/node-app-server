@@ -39,7 +39,8 @@ export default class Processor {
   }
 
   _subscribe(path) {
-    this._log('Processor _subscribe', path);
+    this._log('Processor _subscribe path=%s name=%s',
+      path, this._config.name);
 
     const subscription = this._server
       .pubsub()
@@ -54,7 +55,7 @@ export default class Processor {
   }
 
   _setup() {
-    this._log('Processor _setup');
+    this._log('Processor _setup name=%s', this._config.name);
 
     this._queue = queue((t, c) => this._process(t, c),
       this._config.queue.concurrency);
@@ -76,7 +77,8 @@ export default class Processor {
   }
 
   _process(data, callback) {
-    this._log('Processor _process data=%j', data);
+    this._log('Processor _process data=%j name=%s',
+      data, this._config.name);
 
     this._config
       .task()
@@ -87,6 +89,8 @@ export default class Processor {
   }
 
   _clear() {
+    this._log('Processor _clear name=%s', this._config.name);
+
     if (this._queue) {
       this._queue.kill();
       this._queue = null;
@@ -94,6 +98,9 @@ export default class Processor {
   }
 
   _stat(name, value) {
+    this._log('Processor _stat name=%s value=%s name=%s',
+      name, value, this._config.name);
+
     this._server
       .logger()
       .stat(
@@ -103,6 +110,9 @@ export default class Processor {
   }
 
   _text(name, value) {
+    this._log('Processor _text name=%s value=%s name=%s',
+      name, value, this._config.name);
+
     this._server
       .logger()
       .text(
@@ -122,21 +132,30 @@ export default class Processor {
   }
 
   _pause() {
+    this._log('Processor _pause name=%s', this._config.name);
+
     this._queue.pause();
     this._stat('paused', 1);
   }
 
   _reset() {
+    this._log('Processor _reset name=%s', this._config.name);
+
     this._clear();
     this._setup();
   }
 
   _resume() {
+    this._log('Processor _resume name=%s', this._config.name);
+
     this._queue.resume();
     this._stat('paused', 0);
   }
 
   _run(data) {
+    this._log('Processor _run date=%j name=%s',
+      data, this._config.name);
+
     if (this._queue.paused === true) {
       return;
     }
