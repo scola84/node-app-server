@@ -237,12 +237,13 @@ export default class Server extends EventEmitter {
     delete options.host;
 
     this._wsServer = new WsServer(options);
+    this._ws = new WsConnector();
 
-    this._ws = new WsConnector()
-      .server(this._wsServer)
-      .router(this.router())
-      .codec(options.codec)
-      .ping(options.ping);
+    this._ws.server(this._wsServer);
+    this._ws.router(this.router());
+    this._ws.codec(options.codec);
+    this._ws.ping(options.ping);
+    this._ws.dictionary(options.dictionary);
 
     this._bindWs();
     return this;
