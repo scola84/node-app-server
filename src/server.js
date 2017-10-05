@@ -14,6 +14,7 @@ import {
   Router,
   WsConnection,
   WsConnector,
+  dictionary,
   handleError
 } from '@scola/api';
 
@@ -231,7 +232,10 @@ export default class Server extends EventEmitter {
       return this._ws;
     }
 
+    options = Object.assign({}, options);
+
     options.server = this._httpInstance(options);
+    options.dictionary = options.dictionary || dictionary;
 
     delete options.port;
     delete options.host;
