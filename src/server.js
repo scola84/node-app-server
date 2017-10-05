@@ -204,12 +204,16 @@ export default class Server extends EventEmitter {
       return this._pubsub;
     }
 
+    options = Object.assign({}, options);
+
+    options.dictionary = options.dictionary || dictionary;
     options.factory = (u, p, o) => {
       return new WebSocket(u, p, o);
     };
 
     const connection = new WsConnection()
       .codec(options.codec)
+      .dictionary(options.dictionary)
       .reconnector(options);
 
     this._pubsub.connection(connection);
